@@ -1253,11 +1253,19 @@ function init() {
     updatePromptDisplay();
     updateGenerateButton();
     
-    // Try to load API key from localStorage
+    // Try to load API key: localStorage first, then server config
     const savedKey = localStorage.getItem('fal_api_key');
     if (savedKey) {
         elements.apiKey.value = savedKey;
         updateGenerateButton();
+    } else {
+        fetch('/api/config').then(r => r.json()).then(cfg => {
+            if (cfg.falApiKey) {
+                elements.apiKey.value = cfg.falApiKey;
+                localStorage.setItem('fal_api_key', cfg.falApiKey);
+                updateGenerateButton();
+            }
+        }).catch(() => {});
     }
     
     // Save API key on change
